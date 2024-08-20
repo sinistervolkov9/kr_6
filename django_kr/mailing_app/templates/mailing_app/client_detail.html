@@ -1,0 +1,9 @@
+{% extends 'mailing_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<h5>Клиент</h5>
+<h1>{{ client.full_name }}</h1>
+<p>Email: {{ client.email }}</p>
+<p>Комментарий: {{ client.comment }}</p>
+{% endblock %}
