@@ -42,7 +42,7 @@ class Message(models.Model):
     title = models.CharField(max_length=150, verbose_name='Тема')
     text = models.TextField(verbose_name='Содержание')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', default=1, on_delete=models.CASCADE,
-                             verbose_name='пользователь')
+                             verbose_name='Пользователь')
 
     def __str__(self):
         return f'{self.title}'
@@ -57,9 +57,9 @@ class Mailing(models.Model):
     date_time = models.DateTimeField(default=timezone.now, verbose_name="Дата и время для разовых", **NULLABLE)
 
     start_date = models.DateTimeField(default=timezone.now, verbose_name="Начало периода", **NULLABLE)
-    next_date = models.DateTimeField(default=timezone.now, verbose_name="Следующая отправка")  # А зачем?
     end_date = models.DateTimeField(default=timezone.now, verbose_name="Конец периода", **NULLABLE)
-    periodicity = models.CharField(default='one time', max_length=50, verbose_name="Периодичность", choices=PERIODICITY_CHOICES)
+    periodicity = models.CharField(default='one time', max_length=50, verbose_name="Периодичность",
+                                   choices=PERIODICITY_CHOICES)
 
     client = models.ManyToManyField(Client, verbose_name='Клиент')
     message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name='Сообщение', **NULLABLE)
@@ -73,17 +73,14 @@ class Mailing(models.Model):
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
-
-    permissions = [
-        (
-            'set_status',
-            'Can change status'
-        )
-    ]
+        permissions = [
+            ('can_set_status', 'Can set status'),  # Может отключать рассылки
+        ]
 
 
 class Attempt(models.Model):
-    mailing = models.ForeignKey('Mailing', on_delete=models.CASCADE, verbose_name='Рассылка', related_name='attempt', **NULLABLE)
+    mailing = models.ForeignKey('Mailing', on_delete=models.CASCADE, verbose_name='Рассылка', related_name='attempt',
+                                **NULLABLE)
 
     attempt_time = models.DateTimeField(default=timezone.now, verbose_name="Время последней рассылки", **NULLABLE)
     status = models.CharField(max_length=50, choices=STATUS_ATTEMPT, verbose_name='Статус')

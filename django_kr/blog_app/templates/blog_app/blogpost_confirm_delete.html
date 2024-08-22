@@ -1,0 +1,12 @@
+{% extends 'blog_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<h1>Удаление блога: {{ blog.title }}</h1>
+<p>Вы уверены, что хотите удалить этот блог?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Да, удалить</button>
+    <a href="{% url 'blog_app:blog_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

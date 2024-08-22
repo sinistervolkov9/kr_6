@@ -1,9 +1,11 @@
-from .forms import ClientForm, MessageForm, MailingForm
+from django.core.exceptions import PermissionDenied
+from .forms import ClientForm, MessageForm, MailingForm, MailingManagerForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy, reverse
 from .models import Client, Mailing, Message, Attempt
 from django.views.generic import CreateView, UpdateView, DeleteView, TemplateView, ListView, DetailView
+from blog_app.models import BlogPost
 import random
 
 
@@ -11,36 +13,32 @@ class HomeTemplateView(TemplateView):
     """Контроллер главной страницы"""
 
     template_name = 'mailing_app/base.html'
-    # template_name = 'newsletter/base.html'
 
     def get_context_data(self, *args, **kwargs):
-        context_data = super().get_context_data(*args, **kwargs)
+        context = super().get_context_data(*args, **kwargs)
 
         client_count = len(Client.objects.filter(user=self.request.user.pk))
         message_count = len(Message.objects.filter(user=self.request.user.pk))
-        newsletter_count = len(Mailing.objects.filter
-                               (user=self.request.user.pk))
+        newsletter_count = len(Mailing.objects.filter(user=self.request.user.pk))
+        active_newsletter = len(Mailing.objects.filter(user=self.request.user.pk, status='started'))
+        blogs = BlogPost.objects.all()
 
-        active_newsletter = len(Mailing.objects.filter
-                                (user=self.request.user.pk, status='started'))
+        context['random_blogs'] = random.sample(list(blogs), min(3, len(blogs)))
 
-        # blog_list = list(Blog.objects.all())
-        # random.shuffle(blog_list)
+        context['newsletter_count'] = newsletter_count
+        context['client_count'] = client_count
+        context['active_newsletter'] = active_newsletter
+        context['message_count'] = message_count
 
-        context_data['newsletter_count'] = newsletter_count
-        context_data['client_count'] = client_count
-        context_data['active_newsletter'] = active_newsletter
-        context_data['message_count'] = message_count
-        # context_data['blog_list'] = blog_list[:3]
+        context['is_home'] = self.request.path == reverse('newsletter:base')
 
-        return context_data
+        return context
 
 
 class ClientCreateView(LoginRequiredMixin, CreateView):
     model = Client
     form_class = ClientForm
     template_name = 'mailing_app/client_form.html'
-    # template_name = 'newsletter/client_form.html'
     success_url = reverse_lazy('newsletter:client_list')
 
     def form_valid(self, form):
@@ -61,7 +59,6 @@ class ClientListView(LoginRequiredMixin, ListView):
 class ClientDetailView(DetailView):
     model = Client
     template_name = 'mailing_app/client_detail.html'
-    # template_name = 'newsletter/client_detail.html'
     context_object_name = 'client'
 
 
@@ -69,7 +66,6 @@ class ClientUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Client
     form_class = ClientForm
     template_name = 'mailing_app/client_form.html'
-    # template_name = 'newsletter/client_form.html'
     success_url = reverse_lazy('newsletter:client_list')
 
     def test_func(self):
@@ -93,7 +89,7 @@ class ClientDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
-    success_url = reverse_lazy('mailing_app:base')
+    success_url = reverse_lazy('mailing_app:message_list')
 
     def form_valid(self, form):
         """Добавление пользователя к сообщению"""
@@ -109,6 +105,12 @@ class MessageListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         """Вывод сообщений пользователя"""
         return super().get_queryset().filter(user=self.request.user)
+
+
+class MessageDetailView(DetailView):
+    model = Message
+    template_name = 'mailing_app/message_detail.html'
+    context_object_name = 'message'
 
 
 class MessageUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -140,7 +142,7 @@ class MessageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class NewsLetterCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
-    success_url = reverse_lazy('mailing_app:base')
+    success_url = reverse_lazy('mailing_app:mailing_list')
 
     def form_valid(self, form):
         """Добавление пользователя к рассылке"""
@@ -148,6 +150,12 @@ class NewsLetterCreateView(LoginRequiredMixin, CreateView):
         self.object.user = self.request.user
         self.object.save()
         return super().form_valid(form)
+
+
+class NewsLetterDetailView(DetailView):
+    model = Mailing
+    template_name = 'mailing_app/mailing_detail.html'
+    context_object_name = 'mailing'
 
 
 class NewsLetterListView(LoginRequiredMixin, ListView):
@@ -163,7 +171,7 @@ class NewsLetterListView(LoginRequiredMixin, ListView):
 class NewsLetterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Mailing
     form_class = MailingForm
-    success_url = reverse_lazy('newsletter:newsletter_list')
+    success_url = reverse_lazy('newsletter:mailing_list')
 
     def test_func(self):
         user = self.request.user
@@ -171,10 +179,18 @@ class NewsLetterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return self.handle_no_permission()
 
+    def get_form_class(self):
+        user = self.request.user
+        if user == self.object.user:
+            return MailingForm
+        if user.has_perm('can_set_status'):
+            return MailingManagerForm
+        raise PermissionDenied
+
 
 class NewsLetterDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Mailing
-    success_url = reverse_lazy('newsletter:newsletter_list')
+    success_url = reverse_lazy('newsletter:mailing_list')
 
     def test_func(self):
         user = self.request.user
@@ -196,7 +212,7 @@ def status_newsletter(request, pk):
         else:
             newsletter.status = 'started'
             newsletter.save()
-    return redirect(reverse('newsletter:newsletter_list'))
+    return redirect(reverse('newsletter:mailing_list'))
 
 
 def finish_newsletter(request, pk):
@@ -204,7 +220,7 @@ def finish_newsletter(request, pk):
     if request.user == newsletter.user or request.user.has_perm('newsletter.set_status'):
         newsletter.status = 'completed'
         newsletter.save()
-    return redirect(reverse('newsletter:newsletter_list'))
+    return redirect(reverse('newsletter:mailing_list'))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

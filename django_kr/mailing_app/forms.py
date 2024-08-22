@@ -1,7 +1,5 @@
 from django import forms
-from django.forms import fields
 from .models import Client, Mailing, Message
-from django.db import models
 
 
 class StyleFormMixin:
@@ -43,3 +41,19 @@ class MailingForm(forms.ModelForm):
                        'step': 3600, }
             )
         }
+
+class MailingManagerForm(forms.ModelForm):
+    class Meta:
+        model = Mailing
+        fields = ['status', ]
+        # exclude = ('user', 'status', 'next_date',)
+        # widgets = {
+        #     'start_date': forms.DateTimeInput(
+        #         attrs={'type': 'datetime-local',
+        #                'step': 3600, }
+        #     ),
+        #     'end_date': forms.DateTimeInput(
+        #         attrs={'type': 'datetime-local',
+        #                'step': 3600, }
+        #     )
+        # }

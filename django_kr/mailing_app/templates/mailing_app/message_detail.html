@@ -1,0 +1,8 @@
+{% extends 'mailing_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<h5>Сообщение</h5>
+<h1>{{ message.title }}</h1>
+<p>Содержание: {{ message.text }}</p>
+{% endblock %}

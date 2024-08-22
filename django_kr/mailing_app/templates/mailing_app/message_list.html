@@ -4,7 +4,7 @@
 {% block content  %}
 <div class="row mb-4">
     <div class="col-md-12">
-        <a href="{% url 'mailing_app:client_create' %}" class="btn btn-primary">Добавить нового клиента</a>
+        <a href="{% url 'mailing_app:create_message' %}" class="btn btn-primary">Создать сообщение</a>
     </div>
 </div>
 
@@ -13,18 +13,17 @@
     <div class="col-md-4">
         <div class="card mb-4 box-shadow">
             <div class="card-body">
-                <p class="card-text"><strong>{{ object.full_name }}</strong></p>
-                <p class="card-text"><strong>Email:</strong> {{ object.email }}</p>
+                <p class="card-text"><strong>{{ object.title }}</strong></p>
                 {% if object.created_by %}
                 <p class="card-text"><strong>Создан пользователем:</strong> {{ object.created_by.username }}</p>
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
-                        <a href="{% url 'mailing_app:client_detail' object.id %}"
+                        <a href="{% url 'mailing_app:message_detail' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Подробнее</a>
-                        <a href="{% url 'mailing_app:client_update' object.id %}"
+                        <a href="{% url 'mailing_app:edit_message' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Изменить</a>
-                        <a href="{% url 'mailing_app:client_delete' object.id %}"
+                        <a href="{% url 'mailing_app:delete_message' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Удалить</a>
                     </div>
                 </div>

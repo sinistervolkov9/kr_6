@@ -1,0 +1,34 @@
+{% extends 'blog_app/base.html' %}
+{% load my_tags %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card mb-4 box-shadow">
+                <img class="card-img-top img-fluid" src="{{ object.image|mymedia }}" alt="Blog image">
+                <div class="card-body">
+                    <h2 class="card-title">{{ object.title }}</h2>
+                    <p class="card-text"><strong>Автор:</strong> {{ object.user.username }}</p>
+                    <p class="card-text"><strong>Дата публикации:</strong> {{ object.published_date|date:"d M Y H:i" }}</p>
+                    <p class="card-text"><strong>Количество просмотров:</strong> {{ object.views }}</p>
+                    <hr>
+                    <p class="card-text">{{ object.content }}</p>
+
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="btn-group">
+                            {% if user == object.user %}
+                            <a href="{% url 'blog_app:blog_update' object.id %}" class="btn btn-primary">Изменить</a>
+                            <a href="{% url 'blog_app:blog_delete' object.id %}" class="btn btn-danger">Удалить</a>
+                            {% endif %}
+                            <a href="{% url 'blog_app:blog_list' %}" class="btn btn-secondary">Назад к списку</a>
+                        </div>
+                        <small class="text-muted">Опубликовано: {{ object.published_date|date:"d M Y H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

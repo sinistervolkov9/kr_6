@@ -1,0 +1,14 @@
+{% extends 'mailing_app/base.html' %}
+{% load static %}
+
+{% block content %}
+<h5>Рассылка</h5>
+<h1>{{ mailing.name }}</h1>
+<p>Начало: {{ mailing.date_time }}</p>
+<p>Начало периода: {{ mailing.start_date }}</p>
+<p>Конец периода: {{ mailing.end_date }}</p>
+<p>Периодичность: {{ mailing.periodicity }}</p>
+<p>Получатель: {{ mailing.client }}</p>
+<p>Сообщение: {{ mailing.message }}</p>
+<p>Статус: {{ mailing.status }}</p>
+{% endblock %}

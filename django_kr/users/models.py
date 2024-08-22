@@ -12,7 +12,7 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, verbose_name='Почта')
     phone = models.CharField(max_length=30, verbose_name='Телефон', **NULLABLE)
     country = models.CharField(max_length=30, verbose_name='Страна', **NULLABLE)
-    avatar = models.ImageField(upload_to='users/', verbose_name="Аватар", **NULLABLE)
+    avatar = models.ImageField(upload_to='users/', default='default user.png', verbose_name="Аватар", **NULLABLE)
 
     verify_code = models.CharField(max_length=6, default=random_code, verbose_name='Код верификации')
 
@@ -22,10 +22,6 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-
         permissions = [
-            (
-                'set_is_active',
-                'Can deactivate user'
-            )
+            ('can_block_users', 'Can activate or deactivate user')  # Может блокировать пользователей сервиса (set is_active)
         ]

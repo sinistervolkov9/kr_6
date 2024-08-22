@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 
 def send_mailing_periodicity(periodicity, days):
-    now = timezone.now().astimezone(MOSCOW_TZ)
+    now = timezone.now().astimezone(MOSCOW_TZ).replace(microsecond=0)
     mailings = Mailing.objects.filter(periodicity=periodicity).exclude(status='completed')
 
     print(periodicity)
@@ -62,12 +62,25 @@ def send_mailing_periodicity(periodicity, days):
 
         print(mailing_app)
 
-        last_attempt_time = mailing_app.attempt.order_by('-attempt_time').values_list('attempt_time').first()[0].astimezone(MOSCOW_TZ)
+        try:
+            last_attempt_time = mailing_app.attempt.order_by('-attempt_time').values_list('attempt_time').first()[0].astimezone(MOSCOW_TZ)
+        except Exception as e:
+            last_attempt_time = mailing_app.start_date.astimezone(MOSCOW_TZ) - datetime.timedelta(days=days)
 
-        lower_bound = last_attempt_time - datetime.timedelta(days=days, minutes=10)
-        upper_bound = last_attempt_time - datetime.timedelta(days=days, minutes=-10)
+        print(last_attempt_time)
 
-        if lower_bound <= now <= upper_bound:
+        lower_bound = last_attempt_time + datetime.timedelta(days=days, minutes=10)
+        upper_bound = last_attempt_time + datetime.timedelta(days=days, minutes=-10)
+
+        print(lower_bound)
+        print(upper_bound)
+        print(now)
+        print()
+        print(lower_bound >= now >= upper_bound)
+        print(lower_bound >= now)
+        print(now >= upper_bound)
+
+        if lower_bound >= now >= upper_bound:
 
             print('отправка')
 
@@ -93,24 +106,6 @@ def send_mailing_periodicity(periodicity, days):
                         # response=str(e)
                     )
 
-# send_mailing_periodicity('week', 7)
-
-
-# def send_message():
-#     send_mail('Заголовок', 'Сообщение', 'sinister.volkov9@yandex.ru', ['sinister.volkov9@yandex.ru'])
-
-
-# @util.close_if_running
-# def start_scheduler():
-#     # scheduler.add_job(send_message, 'interval', seconds=30)
-#     if not scheduler.get_jobs():
-#         scheduler.add_job(send_mailing, 'interval', seconds=30)
-#         scheduler.start()
-
-
-# if __name__ == '__main__':
-#     send_mailing()
-
 
 class Command(BaseCommand):
     help = 'Runs APScheaduler'
@@ -129,7 +124,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             send_mailing_periodicity,
-            trigger=CronTrigger(hour='*', minute='20'),
+            trigger=CronTrigger(hour='*', minute='0'),
             id=f'send_message_day',
             max_instances=1,
             replace_existing=True,
@@ -138,7 +133,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             send_mailing_periodicity,
-            trigger=CronTrigger(hour='*', minute='10'),
+            trigger=CronTrigger(hour='*', minute='0'),
             id=f'send_message_week',
             max_instances=1,
             replace_existing=True,
@@ -147,7 +142,7 @@ class Command(BaseCommand):
 
         scheduler.add_job(
             send_mailing_periodicity,
-            trigger=CronTrigger(hour='*', minute='10'),
+            trigger=CronTrigger(hour='*', minute='0'),
             id=f'send_message_month',
             max_instances=1,
             replace_existing=True,
@@ -160,10 +155,6 @@ class Command(BaseCommand):
             scheduler.shutdown()
 
 
-# scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
-# scheduler.add_jobstore(DjangoJobStore(), 'default')
-
-
 def change_status(mailing):
     if timezone.now() > mailing.start_date:
         mailing.status = 'started'
@@ -172,6 +163,23 @@ def change_status(mailing):
         mailing.status = 'completed'
 
     mailing.save()
+
+# scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
+# scheduler.add_jobstore(DjangoJobStore(), 'default')
+
+# send_mailing_periodicity('week', 7)
+
+
+# def send_message():
+#     send_mail('Заголовок', 'Сообщение', 'sinister.volkov9@yandex.ru', ['sinister.volkov9@yandex.ru'])
+
+
+# @util.close_if_running
+# def start_scheduler():
+#     # scheduler.add_job(send_message, 'interval', seconds=30)
+#     if not scheduler.get_jobs():
+#         scheduler.add_job(send_mailing, 'interval', seconds=30)
+#         scheduler.start()
 
 
 # def start_or_not_mailing():

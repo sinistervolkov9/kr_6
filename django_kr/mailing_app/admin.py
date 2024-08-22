@@ -16,9 +16,10 @@ class MessageAdmin(admin.ModelAdmin):
 
 @admin.register(Mailing)
 class NewsLetterAdmin(admin.ModelAdmin):
-    list_display = ('user', 'status', 'periodicity', )
-    list_filter = ('user', )
+    list_display = ('id', 'name', 'status', 'periodicity', )
+    list_filter = ('id', )
 
 @admin.register(Attempt)
 class AttemptAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('mailing', 'attempt_time', 'status')
+    list_filter = ('attempt_time',)
