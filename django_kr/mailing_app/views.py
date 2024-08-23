@@ -174,11 +174,13 @@ class NewsLetterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('newsletter:mailing_list')
 
     def test_func(self):
-        mailing = self.get_object()
-        return self.request.user.is_superuser or mailing.user == self.request.user
+        # mailing = self.get_object()
+        # return self.request.user.is_superuser or mailing.user == self.request.user
+        return True
 
     def get_form_class(self):
         user = self.request.user
+        print(user)
         if user == self.object.user or user.is_superuser:
             return MailingForm
         if user.has_perm('mailing_app.can_set_status'):
