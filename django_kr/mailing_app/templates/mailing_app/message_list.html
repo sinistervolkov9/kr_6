@@ -21,10 +21,12 @@
                     <div class="btn-group">
                         <a href="{% url 'mailing_app:message_detail' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                        {% if user.is_authenticated and user.is_superuser or user == object.user %}
                         <a href="{% url 'mailing_app:edit_message' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Изменить</a>
                         <a href="{% url 'mailing_app:delete_message' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Удалить</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
