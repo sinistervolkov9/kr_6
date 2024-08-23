@@ -17,10 +17,14 @@ class HomeTemplateView(TemplateView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
-        client_count = len(Client.objects.filter(user=self.request.user.pk))
-        message_count = len(Message.objects.filter(user=self.request.user.pk))
-        newsletter_count = len(Mailing.objects.filter(user=self.request.user.pk))
-        active_newsletter = len(Mailing.objects.filter(user=self.request.user.pk, status='started'))
+        # client_count = len(Client.objects.filter(user=self.request.user.pk))
+        # newsletter_count = len(Mailing.objects.filter(user=self.request.user.pk))
+        # active_newsletter = len(Mailing.objects.filter(user=self.request.user.pk, status='started'))
+
+        client_count = Client.objects.count()
+        newsletter_count = Mailing.objects.count()
+        active_newsletter = len(Mailing.objects.filter(status='started'))
+
         blogs = BlogPost.objects.all()
 
         context['random_blogs'] = random.sample(list(blogs), min(3, len(blogs)))
@@ -28,7 +32,6 @@ class HomeTemplateView(TemplateView):
         context['newsletter_count'] = newsletter_count
         context['client_count'] = client_count
         context['active_newsletter'] = active_newsletter
-        context['message_count'] = message_count
 
         context['is_home'] = self.request.path == reverse('newsletter:base')
 
@@ -53,7 +56,8 @@ class ClientListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Вывод клиентов пользователя"""
-        return super().get_queryset().filter(user=self.request.user)
+        # return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset()
 
 
 class ClientDetailView(DetailView):
@@ -69,10 +73,8 @@ class ClientUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('newsletter:client_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        client = self.get_object()
+        return self.request.user.is_superuser or client.user == self.request.user
 
 
 class ClientDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -80,11 +82,11 @@ class ClientDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('newsletter:client_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        client = self.get_object()
+        return self.request.user.is_superuser or client.user == self.request.user
 
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
@@ -104,7 +106,8 @@ class MessageListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Вывод сообщений пользователя"""
-        return super().get_queryset().filter(user=self.request.user)
+        # return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset()
 
 
 class MessageDetailView(DetailView):
@@ -119,10 +122,8 @@ class MessageUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('newsletter:message_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        message = self.get_object()
+        return self.request.user.is_superuser or message.user == self.request.user
 
 
 class MessageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -130,10 +131,8 @@ class MessageDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('newsletter:message_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        message = self.get_object()
+        return self.request.user.is_superuser or message.user == self.request.user
 
 
 # -----------------------------------------------------------------------------------------------------------------------
@@ -165,7 +164,8 @@ class NewsLetterListView(LoginRequiredMixin, ListView):
         """Вывод рассылок пользователя либо всех рассылок для модератора"""
         if self.request.user.has_perm('newsletter.view_newsletter'):
             return super().get_queryset()
-        return super().get_queryset().filter(user=self.request.user)
+        # return super().get_queryset().filter(user=self.request.user)
+        return super().get_queryset()
 
 
 class NewsLetterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -174,16 +174,14 @@ class NewsLetterUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('newsletter:mailing_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        mailing = self.get_object()
+        return self.request.user.is_superuser or mailing.user == self.request.user
 
     def get_form_class(self):
         user = self.request.user
-        if user == self.object.user:
+        if user == self.object.user or user.is_superuser:
             return MailingForm
-        if user.has_perm('can_set_status'):
+        if user.has_perm('mailing_app.can_set_status'):
             return MailingManagerForm
         raise PermissionDenied
 
@@ -193,10 +191,8 @@ class NewsLetterDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('newsletter:mailing_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        mailing = self.get_object()
+        return self.request.user.is_superuser or mailing.user == self.request.user
 
 
 def status_newsletter(request, pk):

@@ -15,17 +15,19 @@
             <div class="card-body">
                 <p class="card-text"><strong>{{ object.full_name }}</strong></p>
                 <p class="card-text"><strong>Email:</strong> {{ object.email }}</p>
-                {% if object.created_by %}
-                <p class="card-text"><strong>Создан пользователем:</strong> {{ object.created_by.username }}</p>
+                {% if object.user %}
+                <p class="card-text"><strong>Создан пользователем:</strong> {{ object.user }}</p>
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a href="{% url 'mailing_app:client_detail' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                        {% if user.is_authenticated and user.is_superuser or user == object.user %}
                         <a href="{% url 'mailing_app:client_update' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Изменить</a>
                         <a href="{% url 'mailing_app:client_delete' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Удалить</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

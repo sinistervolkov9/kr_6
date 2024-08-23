@@ -43,10 +43,8 @@ class BlogUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     success_url = reverse_lazy('blog_app:blog_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        blog = self.get_object()
+        return self.request.user.is_superuser or blog.user == self.request.user
 
 
 class BlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -54,7 +52,5 @@ class BlogDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     success_url = reverse_lazy('blog_app:blog_list')
 
     def test_func(self):
-        user = self.request.user
-        if user == self.get_object().user:
-            return True
-        return self.handle_no_permission()
+        blog = self.get_object()
+        return self.request.user.is_superuser or blog.user == self.request.user

@@ -2,9 +2,6 @@ from django.urls import path
 from .apps import UsersConfig
 from .views import UserLoginView, UserLogoutView, UserUpdateView, generate_password, UserListView, \
     status_user, RegisterUserView, VerifyUserView
-# from .views import RegisterUserView
-# from .views import verification
-from . import views
 
 app_name = UsersConfig.name
 

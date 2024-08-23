@@ -11,14 +11,14 @@
                 <div class="card-body">
                     <h2 class="card-title">{{ object.title }}</h2>
                     <p class="card-text"><strong>Автор:</strong> {{ object.user.username }}</p>
-                    <p class="card-text"><strong>Дата публикации:</strong> {{ object.published_date|date:"d M Y H:i" }}</p>
+                    <p class="card-text"><strong>Дата публикации:</strong> {{ object.published_date|date:"d M Y H:i" }}
+                    </p>
                     <p class="card-text"><strong>Количество просмотров:</strong> {{ object.views }}</p>
                     <hr>
                     <p class="card-text">{{ object.content }}</p>
-
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <div class="btn-group">
-                            {% if user == object.user %}
+                            {% if user.is_authenticated and user.is_superuser or user == object.user %}
                             <a href="{% url 'blog_app:blog_update' object.id %}" class="btn btn-primary">Изменить</a>
                             <a href="{% url 'blog_app:blog_delete' object.id %}" class="btn btn-danger">Удалить</a>
                             {% endif %}

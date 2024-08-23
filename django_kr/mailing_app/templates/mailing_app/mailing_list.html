@@ -14,19 +14,32 @@
         <div class="card mb-4 box-shadow">
             <div class="card-body">
                 <p class="card-text"><strong>{{ object.name }}</strong></p>
-                <p class="card-text"><strong>Получатель:</strong> {{ object.client }}</p>
+                {% if object.client.exists %}
+                <p class="card-text"><strong>Получатели:</strong></p>
+                <ul>
+                    {% for client in object.client.all %}
+                    <li>{{ client.full_name }} ({{ client.email }})</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="card-text"><strong>Получатели:</strong> Нет данных о клиентах</p>
+                {% endif %}
                 <p class="card-text"><strong>Статус:</strong> {{ object.status }}</p>
-                {% if object.created_by %}
-                <p class="card-text"><strong>Создан пользователем:</strong> {{ object.created_by.username }}</p>
+                {% if object.user %}
+                <p class="card-text"><strong>Создано пользователем:</strong> {{ object.user }}</p>
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">
                         <a href="{% url 'mailing_app:mailing_detail' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                        {% if user.is_authenticated and user == object.user or perms.mailing_app.can_set_status or user.is_superuser %}
                         <a href="{% url 'mailing_app:edit_mailing' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Изменить</a>
+                        {% endif %}
+                        {% if user.is_authenticated and user == object.user or user.is_superuser %}
                         <a href="{% url 'mailing_app:delete_mailing' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Удалить</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

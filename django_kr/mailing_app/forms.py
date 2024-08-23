@@ -1,5 +1,5 @@
-from django import forms
 from .models import Client, Mailing, Message
+from django import forms
 
 
 class StyleFormMixin:
@@ -22,15 +22,10 @@ class MessageForm(forms.ModelForm):
         fields = ['title', 'text', ]
 
 
-from django import forms
-from .models import Mailing
-
-
 class MailingForm(forms.ModelForm):
     class Meta:
         model = Mailing
-        # fields = ['start_time', 'periodicity', 'status', 'message', 'client', ]
-        exclude = ('user', 'status', 'next_date',)
+        exclude = ('user',)
         widgets = {
             'start_date': forms.DateTimeInput(
                 attrs={'type': 'datetime-local',
@@ -42,18 +37,8 @@ class MailingForm(forms.ModelForm):
             )
         }
 
+
 class MailingManagerForm(forms.ModelForm):
     class Meta:
         model = Mailing
         fields = ['status', ]
-        # exclude = ('user', 'status', 'next_date',)
-        # widgets = {
-        #     'start_date': forms.DateTimeInput(
-        #         attrs={'type': 'datetime-local',
-        #                'step': 3600, }
-        #     ),
-        #     'end_date': forms.DateTimeInput(
-        #         attrs={'type': 'datetime-local',
-        #                'step': 3600, }
-        #     )
-        # }

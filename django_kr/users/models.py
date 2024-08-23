@@ -23,5 +23,6 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         permissions = [
-            ('can_block_users', 'Can activate or deactivate user')  # Может блокировать пользователей сервиса (set is_active)
+            ('can_block_users', 'Can activate or deactivate user')
+            # Может блокировать пользователей сервиса (set is_active)
         ]

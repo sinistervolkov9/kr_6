@@ -14,8 +14,8 @@
         <div class="card mb-4 box-shadow">
             <div class="card-body">
                 <p class="card-text"><strong>{{ object.title }}</strong></p>
-                {% if object.created_by %}
-                <p class="card-text"><strong>Создан пользователем:</strong> {{ object.created_by.username }}</p>
+                {% if object.user %}
+                <p class="card-text"><strong>Создано пользователем:</strong> {{ object.user }}</p>
                 {% endif %}
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="btn-group">

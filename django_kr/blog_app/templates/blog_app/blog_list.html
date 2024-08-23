@@ -21,8 +21,7 @@
                     <div class="btn-group">
                         <a href="{% url 'blog_app:blog_detail' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Подробнее</a>
-
-                        {% if user.is_authenticated and user == object.user %}
+                        {% if user.is_authenticated and user.is_superuser or user == object.user %}
                         <a href="{% url 'blog_app:blog_update' object.id %}"
                            class="btn btn-sm btn-outline-secondary">Изменить</a>
                         <a href="{% url 'blog_app:blog_delete' object.id %}"

@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
 
-    <title>Dashboard</title>
+    <title>Website</title>
 
     <!-- Bootstrap core CSS -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
@@ -73,12 +73,13 @@
                 </li>
                 {% endif %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown"
                        aria-haspopup="true" aria-expanded="false">
                         {% if user.is_authenticated %}
-                            {{ user.username }}
+                        {{ user.username }}
                         {% else %}
-                            Вход
+                        Вход
                         {% endif %}
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">

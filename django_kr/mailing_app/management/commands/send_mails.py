@@ -13,7 +13,6 @@ from django_apscheduler.models import DjangoJobExecution
 from django_apscheduler import util
 import pytz
 
-
 MOSCOW_TZ = pytz.timezone('Europe/Moscow')
 DEFAULT_FROM_EMAIL = 'sinister.volkov9@yandex.ru'
 
@@ -63,7 +62,8 @@ def send_mailing_periodicity(periodicity, days):
         print(mailing_app)
 
         try:
-            last_attempt_time = mailing_app.attempt.order_by('-attempt_time').values_list('attempt_time').first()[0].astimezone(MOSCOW_TZ)
+            last_attempt_time = mailing_app.attempt.order_by('-attempt_time').values_list('attempt_time').first()[
+                0].astimezone(MOSCOW_TZ)
         except Exception as e:
             last_attempt_time = mailing_app.start_date.astimezone(MOSCOW_TZ) - datetime.timedelta(days=days)
 

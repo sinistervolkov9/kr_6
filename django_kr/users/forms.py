@@ -11,12 +11,6 @@ class StyleFormMixin:
             field.widget.attrs['class'] = 'form-control'
 
 
-# class UserProfileForm(UserChangeForm):
-#     class Meta:
-#         model = User
-#         fields = ('username', 'country', 'phone', 'avatar')
-
-
 class RegisterForm(StyleFormMixin, UserCreationForm):
     """Форма регистрации"""
 
